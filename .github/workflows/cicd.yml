@@ -1,0 +1,41 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-push:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Login to Docker Hub
+        run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
+
+      - name: Build Docker image
+        run: docker build -t aveeefr/devops_tp_final:latest ./partie2
+
+      - name: Push Docker image
+        run: docker push aveeefr/devops_tp_final:latest
+
+  deploy:
+    runs-on: self-hosted
+    needs: build-and-push
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Setup infrastructure
+        run: bash partie1/get_ip_and_inventory.sh
+
+      - name: Install k3s
+        run: ansible-playbook -i partie1/inventory.ini partie1/install_k3s.yml
+
+      - name: Deploy to Kubernetes
+        run: |
+          kubectl apply -f partie3/secret.yaml
+          kubectl apply -f partie3/mysql.yaml
+          kubectl apply -f partie3/api.yaml
