@@ -36,6 +36,7 @@ jobs:
 
       - name: Deploy to Kubernetes
         run: |
-          kubectl apply -f partie3/secret.yaml
-          kubectl apply -f partie3/mysql.yaml
-          kubectl apply -f partie3/api.yaml
+          ansible -i partie1/inventory.ini all -b -m copy -a "src=partie3 dest=/tmp/"
+          ansible -i partie1/inventory.ini all -b -m shell -a "k3s kubectl apply -f /tmp/partie3/secret.yaml"
+          ansible -i partie1/inventory.ini all -b -m shell -a "k3s kubectl apply -f /tmp/partie3/mysql.yaml"
+          ansible -i partie1/inventory.ini all -b -m shell -a "k3s kubectl apply -f /tmp/partie3/api.yaml"
