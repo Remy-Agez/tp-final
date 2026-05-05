@@ -40,3 +40,8 @@ jobs:
           ansible -i partie1/inventory.ini all -b -m shell -a "k3s kubectl apply -f /tmp/partie3/secret.yaml"
           ansible -i partie1/inventory.ini all -b -m shell -a "k3s kubectl apply -f /tmp/partie3/mysql.yaml"
           ansible -i partie1/inventory.ini all -b -m shell -a "k3s kubectl apply -f /tmp/partie3/api.yaml"
+
+      - name: Setup Monitoring
+        run: |
+          ansible-playbook -i partie1/inventory.ini partie5/install_node_exporter_k3s.yml
+          ansible-playbook -i partie5/inventory.ini partie5/install_monitoring.yml

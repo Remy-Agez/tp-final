@@ -1,0 +1,113 @@
+- hosts: monitoring
+  become: yes
+
+  tasks:
+    - name: Créer utilisateur prometheus
+      user:
+        name: prometheus
+        shell: /bin/false
+        create_home: no
+
+    - name: Télécharger node_exporter
+      get_url:
+        url: https://github.com/prometheus/node_exporter/releases/download/v1.7.0/node_exporter-1.7.0.linux-amd64.tar.gz
+        dest: /tmp/node_exporter.tar.gz
+
+    - name: Extraire node_exporter
+      unarchive:
+        src: /tmp/node_exporter.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Installer node_exporter
+      copy:
+        src: /tmp/node_exporter-1.7.0.linux-amd64/node_exporter
+        dest: /usr/local/bin/node_exporter
+        mode: '0755'
+        remote_src: yes
+
+    - name: Créer service node_exporter
+      copy:
+        dest: /etc/systemd/system/node_exporter.service
+        content: |
+          [Unit]
+          Description=Node Exporter
+          After=network.target
+          [Service]
+          User=prometheus
+          ExecStart=/usr/local/bin/node_exporter
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Télécharger prometheus
+      get_url:
+        url: https://github.com/prometheus/prometheus/releases/download/v2.49.0/prometheus-2.49.0.linux-amd64.tar.gz
+        dest: /tmp/prometheus.tar.gz
+
+    - name: Extraire prometheus
+      unarchive:
+        src: /tmp/prometheus.tar.gz
+        dest: /tmp/
+        remote_src: yes
+
+    - name: Installer prometheus
+      copy:
+        src: /tmp/prometheus-2.49.0.linux-amd64/prometheus
+        dest: /usr/local/bin/prometheus
+        mode: '0755'
+        remote_src: yes
+
+    - name: Créer dossiers prometheus
+      file:
+        path: "{{ item }}"
+        state: directory
+        owner: prometheus
+      loop:
+        - /etc/prometheus
+        - /var/lib/prometheus
+
+    - name: Configurer prometheus
+      copy:
+        dest: /etc/prometheus/prometheus.yml
+        content: |
+          global:
+            scrape_interval: 15s
+          scrape_configs:
+            - job_name: 'monitoring'
+              static_configs:
+                - targets: ['192.168.56.11:9100']
+            - job_name: 'k3s'
+              static_configs:
+                - targets: ['192.168.56.10:9100']
+
+    - name: Créer service prometheus
+      copy:
+        dest: /etc/systemd/system/prometheus.service
+        content: |
+          [Unit]
+          Description=Prometheus
+          After=network.target
+          [Service]
+          User=prometheus
+          ExecStart=/usr/local/bin/prometheus --config.file=/etc/prometheus/prometheus.yml --storage.tsdb.path=/var/lib/prometheus
+          [Install]
+          WantedBy=multi-user.target
+
+    - name: Installer grafana
+      shell: |
+        apt-get install -y apt-transport-https software-properties-common
+        wget -q -O /usr/share/keyrings/grafana.key https://apt.grafana.com/gpg.key
+        echo "deb [signed-by=/usr/share/keyrings/grafana.key] https://apt.grafana.com stable main" > /etc/apt/sources.list.d/grafana.list
+        apt-get update
+        apt-get install -y grafana
+
+    - name: Démarrer et activer les services
+      systemd:
+        name: "{{ item }}"
+        state: started
+        enabled: yes
+        daemon_reload: yes
+      loop:
+        - node_exporter
+        - prometheus
+        - grafana-server
