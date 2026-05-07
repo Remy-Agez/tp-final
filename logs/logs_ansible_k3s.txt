@@ -1,0 +1,9 @@
+
+PLAY [k3s] *********************************************************************
+
+TASK [Gathering Facts] *********************************************************
+fatal: [vm-k3s]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.56.10 port 22: No route to host", "unreachable": true}
+
+PLAY RECAP *********************************************************************
+vm-k3s                     : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+
