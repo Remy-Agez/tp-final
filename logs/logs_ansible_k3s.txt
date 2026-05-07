@@ -2,8 +2,17 @@
 PLAY [k3s] *********************************************************************
 
 TASK [Gathering Facts] *********************************************************
-fatal: [vm-k3s]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.56.10 port 22: No route to host", "unreachable": true}
+ok: [vm-k3s]
+
+TASK [Installer k3s] ***********************************************************
+ok: [vm-k3s]
+
+TASK [Attendre que k3s soit prêt] **********************************************
+ok: [vm-k3s]
+
+TASK [Récupérer le kubeconfig] *************************************************
+ok: [vm-k3s]
 
 PLAY RECAP *********************************************************************
-vm-k3s                     : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+vm-k3s                     : ok=4    changed=0    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 

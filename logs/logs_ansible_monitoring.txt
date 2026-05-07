@@ -2,8 +2,50 @@
 PLAY [monitoring] **************************************************************
 
 TASK [Gathering Facts] *********************************************************
-fatal: [vm-monitoring]: UNREACHABLE! => {"changed": false, "msg": "Failed to connect to the host via ssh: ssh: connect to host 192.168.56.11 port 22: No route to host", "unreachable": true}
+ok: [vm-monitoring]
+
+TASK [Créer utilisateur prometheus] ********************************************
+ok: [vm-monitoring]
+
+TASK [Télécharger node_exporter] ***********************************************
+changed: [vm-monitoring]
+
+TASK [Extraire node_exporter] **************************************************
+changed: [vm-monitoring]
+
+TASK [Installer node_exporter] *************************************************
+ok: [vm-monitoring]
+
+TASK [Créer service node_exporter] *********************************************
+ok: [vm-monitoring]
+
+TASK [Télécharger prometheus] **************************************************
+changed: [vm-monitoring]
+
+TASK [Extraire prometheus] *****************************************************
+changed: [vm-monitoring]
+
+TASK [Installer prometheus] ****************************************************
+ok: [vm-monitoring]
+
+TASK [Créer dossiers prometheus] ***********************************************
+ok: [vm-monitoring] => (item=/etc/prometheus)
+ok: [vm-monitoring] => (item=/var/lib/prometheus)
+
+TASK [Configurer prometheus] ***************************************************
+ok: [vm-monitoring]
+
+TASK [Créer service prometheus] ************************************************
+ok: [vm-monitoring]
+
+TASK [Installer grafana] *******************************************************
+changed: [vm-monitoring]
+
+TASK [Démarrer et activer les services] ****************************************
+ok: [vm-monitoring] => (item=node_exporter)
+ok: [vm-monitoring] => (item=prometheus)
+ok: [vm-monitoring] => (item=grafana-server)
 
 PLAY RECAP *********************************************************************
-vm-monitoring              : ok=0    changed=0    unreachable=1    failed=0    skipped=0    rescued=0    ignored=0   
+vm-monitoring              : ok=14   changed=5    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0   
 
